@@ -391,7 +391,8 @@ bool Resource::ClearResources(LPSTR exeFile)
 	}
 
 	for(int i = 0; i < ril.count; i++) {
-		UpdateResource(hUpdate, ril.ri[i].lpType, ril.ri[i].lpName, ril.ri[i].wLang, 0, 0);
+		if (ril.ri[i].lpName != RT_EMBEDDED_LOADER_CLASS && ril.ri[i].lpName != RT_INPUTSTREAM_CLASS)
+			UpdateResource(hUpdate, ril.ri[i].lpType, ril.ri[i].lpName, ril.ri[i].wLang, 0, 0);
 	}
 
 	// Commit the changes
