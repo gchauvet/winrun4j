@@ -1,11 +1,11 @@
 
 #include "windows.h"
-
+#define CONCAT(a,b) a ## b
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 #ifndef CONSOLE
 1 ICON "../WinRun4J.ico"
 #endif
 
-685 RCDATA "java/ByteBufferInputStream.class"
-686 RCDATA "java/EmbeddedClassLoader.class"
+685 RCDATA "../build/WinRun4J-Debug/ByteBufferInputStream.class"
+686 RCDATA "../build/WinRun4J-Debug/EmbeddedClassLoader.class"
