@@ -10,6 +10,7 @@
 
 #include "JNI.h"
 #include "../common/Log.h"
+#include "../common/Runtime.h"
 
 // Use to store a reference to our embedded classloader (if required)
 static jclass g_classLoaderClass = NULL;
@@ -22,7 +23,6 @@ static jmethodID CLASS_GETCTORS_METHOD;
 
 // The java code for the EmbeddedClassLoader - used to load classes
 // from jars embedded inside executabless
-#include "EmbeddedClasses.cpp"
 
 void JNI::Init(JNIEnv* env)
 {
@@ -91,7 +91,7 @@ int JNI::RunMainClass(JNIEnv* env, TCHAR* mainClassStr, int argc, char* argv[])
 	}
 
 	StrReplace(mainClassStr, '.', '/');
-	jclass mainClass = FindClass(env, mainClassStr);
+	jclass mainClass = env->FindClass(mainClassStr);
 
 	if(mainClass == NULL) {
 		Log::Error("Could not find or initialize main class");
@@ -291,16 +291,9 @@ void JNI::LoadEmbeddedClassloader(JNIEnv* env)
 	jobject loader = env->CallStaticObjectMethod(loaderClass, loaderMethod);
 	loader = env->NewGlobalRef(loader);
 
-	// Load class from static memory
-	jclass bb = env->DefineClass("org/boris/winrun4j/classloader/ByteBufferInputStream", loader, (const jbyte*) g_byteBufferISCode, sizeof(g_byteBufferISCode));
-	jclass cl = env->DefineClass("org/boris/winrun4j/classloader/EmbeddedClassLoader", loader, (const jbyte*) g_classLoaderCode, sizeof(g_classLoaderCode));
-
-	/*
-	jclass bb = DefineClass(env, "F:/eclipse/workspace/org.boris.winrun4j.classloader/bin/org/boris/winrun4j/classloader/ByteBufferInputStream.class",
-		"org/boris/winrun4j/classloader/ByteBufferInputStream", loader);
-	jclass cl = DefineClass(env, "F:/eclipse/workspace/org.boris.winrun4j.classloader/bin/org/boris/winrun4j/classloader/EmbeddedClassLoader.class",
-		"org/boris/winrun4j/classloader/EmbeddedClassLoader", loader);
-		*/
+	// Load class from static memory (ressouces)
+	jclass bb = JNI::LoadInternalClass(env, loader, "ByteBufferInputStream", RT_INPUTSTREAM_CLASS);
+	jclass cl = JNI::LoadInternalClass(env, loader, "EmbeddedClassLoader", RT_EMBEDDED_LOADER_CLASS);
 
 	if(!cl) {
 		PrintStackTrace(env);
@@ -350,6 +343,17 @@ void JNI::LoadEmbeddedClassloader(JNIEnv* env)
 		g_classLoader = NULL;
 		return;
 	}
+}
+
+jclass JNI::LoadInternalClass(JNIEnv* env, jobject loader, TCHAR *className, LPCSTR rt) {
+	HINSTANCE hModule = GetModuleHandle(NULL);
+	HRSRC hResource = FindResource(hModule, rt, RT_RCDATA);
+	HGLOBAL hMemory = LoadResource(hModule, hResource);
+	DWORD dwSize = SizeofResource(hModule, hResource);
+	LPVOID lpAddress = LockResource(hMemory);
+	char *bytes = new char[dwSize];
+	memcpy(bytes, lpAddress, dwSize);
+	return env->DefineClass(className, loader, (const jbyte*)bytes, dwSize);
 }
 
 void JNI::SetContextClassLoader(JNIEnv* env, jobject refObject)

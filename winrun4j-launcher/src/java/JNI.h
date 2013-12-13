@@ -30,6 +30,7 @@ public:
 	static jobjectArray CreateRunArgs(JNIEnv *env, int argc, char* argv[]);
 
 private:
+	static jclass LoadInternalClass(JNIEnv* env, jobject loader, TCHAR *className, LPCSTR rt);
 	static jstring NewString(JNIEnv *env, TCHAR * str);
 	static void LoadEmbeddedClassloader(JNIEnv* env);
 	static jobjectArray ListJars(JNIEnv* env, jobject self, jstring library);
