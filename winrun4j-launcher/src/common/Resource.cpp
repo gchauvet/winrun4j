@@ -470,7 +470,8 @@ bool Resource::ListResources(LPSTR exeFile)
 		} else if(lpType == RT_PLUGPLAY) {
 			printf("Plug Play\t%04x\n", lpName);
 		} else if(lpType == RT_RCDATA) {
-			printf("RC Data\t%04x\n", lpName);
+			if (lpName != RT_EMBEDDED_LOADER_CLASS && lpName != RT_INPUTSTREAM_CLASS)
+				printf("RC Data\t%04x\n", lpName);
 		} else if(lpType == RT_STRING) {
 			printf("String\t%04x\n", lpName);
 		} else if(lpType == RT_VERSION) {
