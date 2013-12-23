@@ -90,8 +90,11 @@ int JNI::RunMainClass(JNIEnv* env, TCHAR* mainClassStr, int argc, char* argv[])
 		return 1;
 	}
 
-	StrReplace(mainClassStr, '.', '/');
-	jclass mainClass = env->FindClass(mainClassStr);
+	jclass mainClass = FindClass(env, mainClassStr);
+
+	if (mainClass == NULL) {
+		mainClass = FindClass(NULL, mainClassStr);
+	}
 
 	if(mainClass == NULL) {
 		Log::Error("Could not find or initialize main class");
@@ -250,7 +253,6 @@ jobject JNI::GetJar(JNIEnv* env, jobject self, jstring library, jstring jarName)
 		}
 		resId++;
 	}
-
 	return NULL;
 }
 

@@ -46,7 +46,7 @@ public final class EmbeddedClassLoader extends URLClassLoader
             } catch (MalformedURLException e) {
             }
         }
-        return (URL[]) urls.toArray(new URL[0]);
+        return urls.toArray(new URL[0]);
     }
 
     @Override
@@ -61,8 +61,7 @@ public final class EmbeddedClassLoader extends URLClassLoader
     @Override
     public InputStream getResourceAsStream(String name) {
         for (int i = 0; i < buffers.length; i++) {
-            ByteBuffer bb = buffers[i];
-            bb.position(0);
+            ByteBuffer bb = (ByteBuffer) buffers[i].position(0);
             ZipInputStream zis = new ZipInputStream(new ByteBufferInputStream(bb));
             ZipEntry ze = null;
             try {
@@ -80,10 +79,9 @@ public final class EmbeddedClassLoader extends URLClassLoader
 
     @Override
     protected Class findClass(String name) throws ClassNotFoundException {
-        String cname = name.replace('.', '/').concat(".class");
+        final String cname = name.replace('.', '/').concat(".class");
         for (int i = 0; i < buffers.length; i++) {
-            ByteBuffer bb = buffers[i];
-            bb.position(0);
+            ByteBuffer bb = (ByteBuffer) buffers[i].position(0);
             ZipInputStream zis = new ZipInputStream(new ByteBufferInputStream(bb));
             ZipEntry ze = null;
             try {
@@ -104,8 +102,7 @@ public final class EmbeddedClassLoader extends URLClassLoader
                 throw new ClassNotFoundException(name, e);
             }
         }
-
-        throw new ClassNotFoundException(name);
+		throw new ClassNotFoundException(name);
     }
 
     public static native ByteBuffer getJar(String library, String jarName);
