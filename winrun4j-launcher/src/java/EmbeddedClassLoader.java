@@ -54,6 +54,7 @@ public final class EmbeddedClassLoader extends URLClassLoader
         try {
             return new URL("res:///" + name);
         } catch (MalformedURLException e) {
+			e.printStackTrace();
             return null;
         }
     }
