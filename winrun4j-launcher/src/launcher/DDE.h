@@ -45,7 +45,7 @@ public:
 
 private:
 	static bool RegisterNatives(JNIEnv* env, dictionary* ini);
-	static int EnumFileAssocations(dictionary* ini, bool isRegister, int (*CallbackFunc)(DDEInfo&));
+	static int EnumFileAssocations(dictionary* ini, bool isRegister, int(*CallbackFunc)(DDEInfo&));
 	static int RegisterFileAssociation(DDEInfo&);
 	static int UnregisterFileAssociation(DDEInfo&);
 };

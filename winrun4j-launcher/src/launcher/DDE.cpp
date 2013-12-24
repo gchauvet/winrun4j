@@ -43,23 +43,23 @@ LRESULT CALLBACK DdeMainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 
 HDDEDATA CALLBACK DdeCallback(UINT uType, UINT /*uFmt*/, HCONV /*hconv*/, HDDEDATA hsz1,
-							  HDDEDATA hsz2, HDDEDATA hdata, HDDEDATA /*dwData1*/, HDDEDATA /*dwData2*/)
+	HDDEDATA hsz2, HDDEDATA hdata, HDDEDATA /*dwData1*/, HDDEDATA /*dwData2*/)
 {
 	switch (uType)
 	{
 	case XTYP_CONNECT:
-		if(hsz2 == (HDDEDATA) g_serverName && hsz1 == (HDDEDATA) g_topic)
-			return (HDDEDATA) 1;
+		if (hsz2 == (HDDEDATA)g_serverName && hsz1 == (HDDEDATA)g_topic)
+			return (HDDEDATA)1;
 		break;
 
 	case XTYP_EXECUTE: {
-		UINT size = DdeGetData(hdata, NULL, 0, 0);
-		LPSTR execData = (LPSTR) malloc(size);
-		DdeGetData(hdata, (LPBYTE) execData, size, 0);
-		DDE::Execute(execData);
-		free(execData);
-		return (HDDEDATA) 1;
-					   }
+						   UINT size = DdeGetData(hdata, NULL, 0, 0);
+						   LPSTR execData = (LPSTR)malloc(size);
+						   DdeGetData(hdata, (LPBYTE)execData, size, 0);
+						   DDE::Execute(execData);
+						   free(execData);
+						   return (HDDEDATA)1;
+	}
 		break;
 	}
 
@@ -69,8 +69,8 @@ HDDEDATA CALLBACK DdeCallback(UINT uType, UINT /*uFmt*/, HCONV /*hconv*/, HDDEDA
 bool DDE::RegisterDDE()
 {
 	// Startup DDE library
-	UINT result = DdeInitialize(&g_pidInst, (PFNCALLBACK) &DdeCallback, 0, 0);
-	if(result != DMLERR_NO_ERROR) {
+	UINT result = DdeInitialize(&g_pidInst, (PFNCALLBACK)&DdeCallback, 0, 0);
+	if (result != DMLERR_NO_ERROR) {
 		Log::Error("Unable to initialize DDE: %d", result);
 		return false;
 	}
@@ -90,10 +90,10 @@ bool DDE::RegisterDDE()
 DWORD WINAPI DdeWindowThreadProc(LPVOID lpParam)
 {
 	// Register Window
-	DDE::RegisterWindow((HINSTANCE) lpParam);
+	DDE::RegisterWindow((HINSTANCE)lpParam);
 
 	bool initDde = DDE::RegisterDDE();
-	if(!initDde)
+	if (!initDde)
 		return 1;
 
 	char* clsName = iniparser_getstr(g_ini, DDE_WINDOW_CLASS);
@@ -110,10 +110,10 @@ DWORD WINAPI DdeWindowThreadProc(LPVOID lpParam)
 
 	// Listen for messages
 	MSG msg;
-	while (GetMessage (&msg, NULL, 0, 0))
+	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		TranslateMessage (&msg);
-		DispatchMessage (&msg);
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 
 	return 0;
@@ -123,7 +123,7 @@ bool DDE::Initialize(HINSTANCE hInstance, JNIEnv* env, dictionary* ini)
 {
 	// Check for enabled flag
 	char* ddeEnabled = iniparser_getstr(ini, DDE_ENABLED);
-	if(ddeEnabled == NULL || strcmp("true", ddeEnabled) != 0)
+	if (ddeEnabled == NULL || strcmp("true", ddeEnabled) != 0)
 		return false;
 
 	// Store ini file reference
@@ -135,14 +135,14 @@ bool DDE::Initialize(HINSTANCE hInstance, JNIEnv* env, dictionary* ini)
 		return false;
 
 	// Create Thread to manage the window
-	CreateThread(0, 0, DdeWindowThreadProc, (LPVOID) hInstance, 0, 0);
+	CreateThread(0, 0, DdeWindowThreadProc, (LPVOID)hInstance, 0, 0);
 	return true;
 }
 
 void DDE::Uninitialize()
 {
-	if(g_serverName) DdeFreeStringHandle(g_pidInst, g_serverName);
-	if(g_topic) DdeFreeStringHandle(g_pidInst, g_topic);
+	if (g_serverName) DdeFreeStringHandle(g_pidInst, g_serverName);
+	if (g_topic) DdeFreeStringHandle(g_pidInst, g_topic);
 
 	// Shutdown DDE library
 	DdeUninitialize(g_pidInst);
@@ -153,8 +153,8 @@ bool DDE::NotifySingleInstance(dictionary* ini)
 	g_ini = ini;
 
 	// Startup DDE library
-	UINT result = DdeInitialize(&g_pidInst, (PFNCALLBACK) &DdeCallback, 0, 0);
-	if(result != DMLERR_NO_ERROR) {
+	UINT result = DdeInitialize(&g_pidInst, (PFNCALLBACK)&DdeCallback, 0, 0);
+	if (result != DMLERR_NO_ERROR) {
 		Log::Error("Unable to initialize DDE: %d", result);
 		return false;
 	}
@@ -169,7 +169,7 @@ bool DDE::NotifySingleInstance(dictionary* ini)
 	HCONV conv = DdeConnect(g_pidInst, g_serverName, g_topic, NULL);
 	if (conv != NULL) {
 		LPSTR cmdline = StripArg0(GetCommandLine());
-		char* activate = (char*) malloc(strlen(DDE_EXECUTE_ACTIVATE) + strlen(cmdline) + 2);
+		char* activate = (char*)malloc(strlen(DDE_EXECUTE_ACTIVATE) + strlen(cmdline) + 2);
 		strcpy(activate, DDE_EXECUTE_ACTIVATE);
 		strcat(activate, " ");
 		strcat(activate, cmdline);
@@ -178,7 +178,8 @@ bool DDE::NotifySingleInstance(dictionary* ini)
 			Log::Error("Failed to send DDE single instance notification");
 			return false;
 		}
-	} else{
+	}
+	else{
 		Log::Error("Unable to create DDE conversation");
 	}
 
@@ -189,9 +190,9 @@ bool DDE::NotifySingleInstance(dictionary* ini)
 void DDE::Execute(LPSTR lpExecuteStr)
 {
 	JNIEnv* env = VM::GetJNIEnv(true);
-	if(env == NULL) return;
-	if(g_class == NULL) return;
-	if(g_executeMethodID == NULL) return;
+	if (env == NULL) return;
+	if (g_class == NULL) return;
+	if (g_executeMethodID == NULL) return;
 
 	if (g_ready) {
 		if (g_class != NULL) {
@@ -200,36 +201,40 @@ void DDE::Execute(LPSTR lpExecuteStr)
 			if (memcmp(lpExecuteStr, DDE_EXECUTE_ACTIVATE, 8) == 0) {
 				if (g_activateMethodID != NULL) {
 					jstring str = 0;
-					if(lpExecuteStr) str = env->NewStringUTF(&lpExecuteStr[9]);
+					if (lpExecuteStr) str = env->NewStringUTF(&lpExecuteStr[9]);
 					env->CallStaticVoidMethod(g_class, g_activateMethodID, str);
-				} else {
+				}
+				else {
 					Log::Error("Ignoring DDE single instance activate message");
 				}
-			} else {
+			}
+			else {
 				jstring str = 0;
-				if(lpExecuteStr) str = env->NewStringUTF(lpExecuteStr);
+				if (lpExecuteStr) str = env->NewStringUTF(lpExecuteStr);
 				env->CallStaticVoidMethod(g_class, g_executeMethodID, str);
 			}
 
-			if(env->ExceptionOccurred()) {
+			if (env->ExceptionOccurred()) {
 				env->ExceptionDescribe();
 				env->ExceptionClear();
 			}
 		}
-	} else {
+	}
+	else {
 		/* Allocate a copy of the string */
-		LPSTR buffered = (LPSTR) malloc(MAX_PATH);
+		LPSTR buffered = (LPSTR)malloc(MAX_PATH);
 		strcpy(buffered, lpExecuteStr);
 
 		if (g_buffer == NULL) {
 			/* Create buffer */
 			g_buffer_siz = 10;
-			g_buffer = (LPSTR*) malloc(sizeof(LPSTR) * g_buffer_siz);
-		} else if (g_buffer_ix >= g_buffer_siz) {
+			g_buffer = (LPSTR*)malloc(sizeof(LPSTR)* g_buffer_siz);
+		}
+		else if (g_buffer_ix >= g_buffer_siz) {
 			/* Enlarge buffer */
 			g_buffer_siz += 10;
-			LPSTR *new_buffer = (LPSTR*) malloc(sizeof(LPSTR) * g_buffer_siz);
-			memcpy(new_buffer, g_buffer, sizeof(LPSTR) * g_buffer_ix);
+			LPSTR *new_buffer = (LPSTR*)malloc(sizeof(LPSTR)* g_buffer_siz);
+			memcpy(new_buffer, g_buffer, sizeof(LPSTR)* g_buffer_ix);
 			free(g_buffer);
 			g_buffer = new_buffer;
 		}
@@ -255,7 +260,7 @@ void DDE::Ready() {
 	g_buffer = NULL;
 }
 
-extern "C" __declspec(dllexport) void DDE_Ready() 
+extern "C" __declspec(dllexport) void DDE_Ready()
 {
 	DDE::Ready();
 }
@@ -272,13 +277,13 @@ void DDE::RegisterWindow(HINSTANCE hInstance)
 	wcx.hInstance = hInstance;
 	wcx.hIcon = 0;
 	wcx.hCursor = LoadCursor(NULL, IDC_WAIT);
-	wcx.hbrBackground = (HBRUSH) GetStockObject(LTGRAY_BRUSH);
+	wcx.hbrBackground = (HBRUSH)GetStockObject(LTGRAY_BRUSH);
 	wcx.lpszMenuName = 0;
 	char* clsName = iniparser_getstr(g_ini, DDE_WINDOW_CLASS);
 	wcx.lpszClassName = clsName == NULL ? "WinRun4J.DDEWndClass" : clsName;
 	wcx.hIconSm = 0;
 
-	if(!RegisterClassEx(&wcx)) {
+	if (!RegisterClassEx(&wcx)) {
 		Log::Error("Could not register DDE window class");
 		return;
 	}
@@ -287,68 +292,69 @@ void DDE::RegisterWindow(HINSTANCE hInstance)
 bool DDE::RegisterNatives(JNIEnv* env, dictionary* ini)
 {
 	char* ddeClassName = iniparser_getstr(ini, DDE_CLASS);
-	if(ddeClassName != NULL) {
+	if (ddeClassName != NULL) {
 		int strl = strlen(ddeClassName);
-		for(int i = 0; i < strl; i++) {
-			if(ddeClassName[i] == '.')
+		for (int i = 0; i < strl; i++) {
+			if (ddeClassName[i] == '.')
 				ddeClassName[i] = '/';
 		}
 		g_class = JNI::FindClass(env, ddeClassName);
-	} else {
+	}
+	else {
 		g_class = JNI::FindClass(env, "org/boris/winrun4j/DDE");
 	}
-	if(g_class == NULL) {
+	if (g_class == NULL) {
 		Log::Error("Could not find DDE class.");
-		if(env->ExceptionCheck()) env->ExceptionClear();
+		if (env->ExceptionCheck()) env->ExceptionClear();
 		return false;
 	}
 	// Global ref in case of garbage collection
-	g_class = (jclass) env->NewGlobalRef(g_class);
+	g_class = (jclass)env->NewGlobalRef(g_class);
 
 	g_executeMethodID = env->GetStaticMethodID(g_class, "execute", "(Ljava/lang/String;)V");
-	if(g_executeMethodID == NULL) {
+	if (g_executeMethodID == NULL) {
 		Log::Error("Could not find execute method");
-		if(env->ExceptionCheck()) env->ExceptionClear();
+		if (env->ExceptionCheck()) env->ExceptionClear();
 		return false;
 	}
 
 	g_activateMethodID = env->GetStaticMethodID(g_class, "activate", "(Ljava/lang/String;)V");
-	if(env->ExceptionCheck()) {
+	if (env->ExceptionCheck()) {
 		env->ExceptionClear();
 	}
 
 	return true;
 }
 
-int DDE::EnumFileAssocations(dictionary* ini, bool isRegister, int (*CallbackFunc)(DDEInfo&))
+int DDE::EnumFileAssocations(dictionary* ini, bool isRegister, int(*CallbackFunc)(DDEInfo&))
 {
 	// For the moment just register all
 	char key[MAX_PATH];
 	int res = 0;
-	for(int i = 1;; i++) {
+	for (int i = 1;; i++) {
 		DDEInfo info;
 		info.ini = ini;
 
 		sprintf(key, "FileAssociations:file.%d.extension", i);
 		info.extension = iniparser_getstr(ini, key);
-		if(info.extension == NULL) break;
+		if (info.extension == NULL) break;
 
 		Log::Info(isRegister ? "Registering %s" : "Unregistering %s", info.extension);
 
 		sprintf(key, "FileAssociations:file.%d.name", i);
 		info.name = iniparser_getstr(ini, key);
-		if(info.name == NULL) {
+		if (info.name == NULL) {
 			Log::Error("Name not specified for extension: %s", info.extension);
 			return 1;
 		}
 
 		sprintf(key, "FileAssociations:file.%d.description", i);
 		info.description = iniparser_getstr(ini, key);
-		if(info.description == NULL) {
+		if (info.description == NULL) {
 			Log::Warning("Description not specified for extension: %s", info.extension);
 		}
 
-		if(res = CallbackFunc(info))
+		if (res = CallbackFunc(info))
 			return res;
 	}
 
@@ -364,102 +370,102 @@ int DDE::RegisterFileAssociation(DDEInfo& info)
 {
 	DWORD dwDisp;
 	HKEY hKey;
-	if(RegCreateKeyEx(HKEY_CLASSES_ROOT, info.extension, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
+	if (RegCreateKeyEx(HKEY_CLASSES_ROOT, info.extension, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
 		Log::Error("ERROR: Could not create extension key: %s", info.extension);
 		return 1;
 	}
 
-	if(RegSetValueEx(hKey, NULL, 0, REG_SZ, (BYTE *) info.name, strlen(info.name) + 1)) {
+	if (RegSetValueEx(hKey, NULL, 0, REG_SZ, (BYTE *)info.name, strlen(info.name) + 1)) {
 		Log::Error("ERROR: Could not set name for extension: %s", info.extension);
 		return 1;
 	}
 
-	if(RegCreateKeyEx(HKEY_CLASSES_ROOT, info.name, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
+	if (RegCreateKeyEx(HKEY_CLASSES_ROOT, info.name, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
 		Log::Error("ERROR: Could not create name key: %s", info.name);
 		return 1;
 	}
 
-	if(info.description) {
-		if(RegSetValueEx(hKey, NULL, 0, REG_SZ, (BYTE *) info.description, strlen(info.description) + 1)) {
+	if (info.description) {
+		if (RegSetValueEx(hKey, NULL, 0, REG_SZ, (BYTE *)info.description, strlen(info.description) + 1)) {
 			Log::Error("ERROR: Could not set description for extension: %s", info.extension);
 			return 1;
 		}
 	}
 
-	if(RegCreateKeyEx(HKEY_CLASSES_ROOT, info.name, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
+	if (RegCreateKeyEx(HKEY_CLASSES_ROOT, info.name, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
 		Log::Error("ERROR: Could not create name key: %s", info.name);
 		return 1;
 	}
 
 	HKEY hDep;
-	if(RegCreateKeyEx(hKey, "DefaultIcon", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hDep, &dwDisp)) {
+	if (RegCreateKeyEx(hKey, "DefaultIcon", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hDep, &dwDisp)) {
 		Log::Error("ERROR: Could not create shell key: %s", info.name);
 		return 1;
 	}
 
 	char path[MAX_PATH];
 	GetModuleFileName(NULL, path, MAX_PATH);
-	if(RegSetValueEx(hDep, NULL, 0, REG_SZ, (BYTE *) path, strlen(path) + 1)) {
+	if (RegSetValueEx(hDep, NULL, 0, REG_SZ, (BYTE *)path, strlen(path) + 1)) {
 		Log::Error("ERROR: Could not set command for extension: %s", info.extension);
 		return 1;
 	}
 
-	if(RegCreateKeyEx(hKey, "shell", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
+	if (RegCreateKeyEx(hKey, "shell", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
 		Log::Error("ERROR: Could not create shell key: %s", info.name);
 		return 1;
 	}
 
-	if(RegCreateKeyEx(hKey, "Open", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
+	if (RegCreateKeyEx(hKey, "Open", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp)) {
 		Log::Error("ERROR: Could not create Open key: %s", info.name);
 		return 1;
 	}
 
 	HKEY hCmd;
-	if(RegCreateKeyEx(hKey, "command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hCmd, &dwDisp)) {
+	if (RegCreateKeyEx(hKey, "command", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hCmd, &dwDisp)) {
 		Log::Error("ERROR: Could not create command key: %s", info.name);
 		return 1;
 	}
 
 	strcat(path, " \"%1\"");
-	if(RegSetValueEx(hCmd, NULL, 0, REG_SZ, (BYTE *) path, strlen(path) + 1)) {
+	if (RegSetValueEx(hCmd, NULL, 0, REG_SZ, (BYTE *)path, strlen(path) + 1)) {
 		Log::Error("ERROR: Could not set command for extension: %s", info.extension);
 		return 1;
 	}
 
 	HKEY hDde;
-	if(RegCreateKeyEx(hKey, "ddeexec", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hDde, &dwDisp)) {
+	if (RegCreateKeyEx(hKey, "ddeexec", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hDde, &dwDisp)) {
 		Log::Error("ERROR: Could not create ddeexec key: %s", info.name);
 		return 1;
 	}
 
 	char* cmd = "%1";
-	if(RegSetValueEx(hDde, NULL, 0, REG_SZ, (BYTE *) cmd, strlen(cmd) + 1)) {
+	if (RegSetValueEx(hDde, NULL, 0, REG_SZ, (BYTE *)cmd, strlen(cmd) + 1)) {
 		Log::Error("ERROR: Could not set command string for extension: %s", info.extension);
 		return 1;
 	}
 
 	HKEY hApp;
-	if(RegCreateKeyEx(hDde, "application", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hApp, &dwDisp)) {
+	if (RegCreateKeyEx(hDde, "application", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hApp, &dwDisp)) {
 		Log::Error("ERROR: Could not create ddeexec->application key: %s", info.name);
 		return 1;
 	}
 
 	char* appname = iniparser_getstr(info.ini, DDE_SERVER_NAME);
-	if(appname == NULL) appname = "WinRun4J";
-	if(RegSetValueEx(hApp, NULL, 0, REG_SZ, (BYTE *) appname, strlen(appname) + 1)) {
+	if (appname == NULL) appname = "WinRun4J";
+	if (RegSetValueEx(hApp, NULL, 0, REG_SZ, (BYTE *)appname, strlen(appname) + 1)) {
 		Log::Error("ERROR: Could not set appname for extension: %s", info.extension);
 		return 1;
 	}
 
 	HKEY hTopic;
-	if(RegCreateKeyEx(hDde, "topic", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hTopic, &dwDisp)) {
+	if (RegCreateKeyEx(hDde, "topic", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hTopic, &dwDisp)) {
 		Log::Error("ERROR: Could not create ddeexec->application key: %s", info.name);
 		return 1;
 	}
 
 	char* topic = iniparser_getstr(info.ini, DDE_TOPIC);
-	if(topic == NULL) topic = "system";
-	if(RegSetValueEx(hTopic, NULL, 0, REG_SZ, (BYTE *) topic, strlen(topic) + 1)) {
+	if (topic == NULL) topic = "system";
+	if (RegSetValueEx(hTopic, NULL, 0, REG_SZ, (BYTE *)topic, strlen(topic) + 1)) {
 		Log::Error("ERROR: Could not set topic for extension: %s", info.extension);
 		return 1;
 	}
@@ -469,7 +475,7 @@ int DDE::RegisterFileAssociation(DDEInfo& info)
 
 int DDE::UnregisterFileAssociation(DDEInfo& info)
 {
-	if(RegDeleteKey(HKEY_CLASSES_ROOT, info.extension))
+	if (RegDeleteKey(HKEY_CLASSES_ROOT, info.extension))
 		return 1;
 
 	return 0;

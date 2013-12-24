@@ -1,9 +1,9 @@
 /*******************************************************************************
  * This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ *
  * Contributors:
  *     Peter Smith
  *******************************************************************************/
@@ -37,7 +37,7 @@ class INI
 public:
 	static void GetNumberedKeysFromIni(dictionary* ini, TCHAR* keyName, TCHAR** entries, UINT& index, UINT max = 10);
 	static UINT GetNumberedKeysMax(dictionary* ini, TCHAR* keyName);
-	static void SetNumberedKeys(dictionary* ini, TCHAR* keyName, TCHAR** entries, UINT count); 
+	static void SetNumberedKeys(dictionary* ini, TCHAR* keyName, TCHAR** entries, UINT count);
 	static dictionary* LoadIniFile(HINSTANCE hInstance);
 	static dictionary* LoadIniFile(HINSTANCE hInstance, LPSTR inifile);
 

@@ -15,12 +15,12 @@ iniparser is distributed under an MIT license.
 #include <ctype.h>
 
 typedef struct _dictionary_ {
-	int				n ;		/** Number of entries in dictionary */
-	int				size ;	/** Storage size */
-	char 		**	val ;	/** List of string values */
-	char 		**  key ;	/** List of string keys */
-	unsigned	 *	hash ;	/** List of hash values for keys */
-} dictionary ;
+	int				n;		/** Number of entries in dictionary */
+	int				size;	/** Storage size */
+	char 		**	val;	/** List of string values */
+	char 		**  key;	/** List of string keys */
+	unsigned	 *	hash;	/** List of hash values for keys */
+} dictionary;
 
 // Dictionary 
 
@@ -28,7 +28,7 @@ unsigned dictionary_hash(char * key);
 dictionary * dictionary_new(int size);
 void dictionary_del(dictionary * vd);
 char * dictionary_get(dictionary * d, char * key, char * def);
-char dictionary_getchar(dictionary * d, char * key, char def) ;
+char dictionary_getchar(dictionary * d, char * key, char def);
 int dictionary_getint(dictionary * d, char * key, int def);
 double dictionary_getdouble(dictionary * d, char * key, double def);
 void dictionary_set(dictionary * vd, char * key, char * val);
@@ -50,7 +50,7 @@ double iniparser_getdouble(dictionary * d, char * key, double notfound);
 int iniparser_getboolean(dictionary * d, const char * key, int notfound);
 int iniparser_setstr(dictionary * ini, char * entry, char * val);
 void iniparser_unset(dictionary * ini, char * entry);
-int iniparser_find_entry(dictionary * ini, char * entry) ;
+int iniparser_find_entry(dictionary * ini, char * entry);
 dictionary * iniparser_load(char * ininame, bool isbuffer = false);
 void iniparser_freedict(dictionary * d);
 
@@ -60,7 +60,7 @@ char * strlwc(const char * s);
 char * strupc(char * s);
 char * strskp(char * s);
 char * strcrop(char * s);
-char * strstrip(char * s) ;
-char * sgets(char* buffer, int* pos, char * line, int size) ;
+char * strstrip(char * s);
+char * sgets(char* buffer, int* pos, char * line, int size);
 
 #endif // DICTIONARY_H

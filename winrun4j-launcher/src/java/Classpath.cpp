@@ -1,9 +1,9 @@
 /*******************************************************************************
 * This program and the accompanying materials
 * are made available under the terms of the Common Public License v1.0
-* which accompanies this distribution, and is available at 
+* which accompanies this distribution, and is available at
 * http://www.eclipse.org/legal/cpl-v10.html
-* 
+*
 * Contributors:
 *     Peter Smith
 *******************************************************************************/
@@ -12,7 +12,7 @@
 #include "../common/Log.h"
 #include "../common/Dictionary.h"
 
-namespace 
+namespace
 {
 	bool g_classpathMaxWarned = false;
 };
@@ -20,8 +20,8 @@ namespace
 void ExpandClassPathEntry(char* arg, char** result, int* current, int max)
 {
 	// Check for too many results
-	if(*current >= max) {
-		if(!g_classpathMaxWarned) {
+	if (*current >= max) {
+		if (!g_classpathMaxWarned) {
 			Log::Warning("Exceeded maximum classpath size");
 			g_classpathMaxWarned = true;
 		}
@@ -36,8 +36,8 @@ void ExpandClassPathEntry(char* arg, char** result, int* current, int max)
 	WIN32_FIND_DATA fd;
 
 	// Check for special case - where we don't have a wildcard
-	if(strchr(arg, '*') == NULL) {
-		if(FindFirstFile(fullpath, &fd) != INVALID_HANDLE_VALUE) {
+	if (strchr(arg, '*') == NULL) {
+		if (FindFirstFile(fullpath, &fd) != INVALID_HANDLE_VALUE) {
 			result[*current] = strdup(fullpath);
 			(*current)++;
 			return;
@@ -48,35 +48,36 @@ void ExpandClassPathEntry(char* arg, char** result, int* current, int max)
 	int prev = 0;
 	bool hasStar = false;
 	char search[MAX_PATH];
-	for(int i = 0; i <= len; i++) {
-		if(fullpath[i] == '/' || fullpath[i] == '\\' || fullpath[i] == 0) {
-			if(hasStar) {
+	for (int i = 0; i <= len; i++) {
+		if (fullpath[i] == '/' || fullpath[i] == '\\' || fullpath[i] == 0) {
+			if (hasStar) {
 				// Temp set end of string to be current position
 				fullpath[i] = 0;
 				HANDLE h = FindFirstFile(fullpath, &fd);
-				if(h == INVALID_HANDLE_VALUE) {
+				if (h == INVALID_HANDLE_VALUE) {
 					return;
-				} else {
-					if(strcmp(fd.cFileName, ".") != 0 && strcmp(fd.cFileName, "..") != 0) {
-						if(prev != 0) fullpath[prev] = 0;
+				}
+				else {
+					if (strcmp(fd.cFileName, ".") != 0 && strcmp(fd.cFileName, "..") != 0) {
+						if (prev != 0) fullpath[prev] = 0;
 						strcpy(search, fullpath);
-						if(prev != 0) fullpath[prev] = '/';
+						if (prev != 0) fullpath[prev] = '/';
 						strcat(search, "/");
 						strcat(search, fd.cFileName);
-						if(i < len - 1)	{
+						if (i < len - 1)	{
 							strcat(search, "/");
 							strcat(search, &fullpath[i + 1]);
 						}
 						ExpandClassPathEntry(search, result, current, max);
 					}
-					while(FindNextFile(h, &fd) != 0) {
-						if(strcmp(fd.cFileName, ".") != 0 && strcmp(fd.cFileName, "..") != 0) {
-							if(prev != 0) fullpath[prev] = 0;
+					while (FindNextFile(h, &fd) != 0) {
+						if (strcmp(fd.cFileName, ".") != 0 && strcmp(fd.cFileName, "..") != 0) {
+							if (prev != 0) fullpath[prev] = 0;
 							strcpy(search, fullpath);
-							if(prev != 0) fullpath[prev] = '/';
+							if (prev != 0) fullpath[prev] = '/';
 							strcat(search, "/");
 							strcat(search, fd.cFileName);
-							if(i < len - 1)	{
+							if (i < len - 1)	{
 								strcat(search, "/");
 								strcat(search, &fullpath[i + 1]);
 							}
@@ -85,10 +86,11 @@ void ExpandClassPathEntry(char* arg, char** result, int* current, int max)
 					}
 					return;
 				}
-			} 
+			}
 			hasStar = false;
 			prev = i;
-		} else if(fullpath[i] == '*') {
+		}
+		else if (fullpath[i] == '*') {
 			hasStar = true;
 		}
 	}
@@ -101,7 +103,7 @@ void Classpath::BuildClassPath(dictionary* ini, TCHAR** args, UINT& count)
 	// the current directory (unless a working directory has been set)
 	TCHAR current[MAX_PATH];
 	char* workingDirectory = iniparser_getstr(ini, WORKING_DIR);
-	if(workingDirectory == NULL) {
+	if (workingDirectory == NULL) {
 		GetCurrentDirectory(MAX_PATH, current);
 		SetCurrentDirectory(iniparser_getstr(ini, INI_DIR));
 	}
@@ -110,23 +112,23 @@ void Classpath::BuildClassPath(dictionary* ini, TCHAR** args, UINT& count)
 	int i = 0, index = 0;
 	TCHAR* entry = NULL;
 	TCHAR entryName[MAX_PATH];
-	while(true) {
-		sprintf(entryName, "%s.%d", CLASS_PATH, i+1);
+	while (true) {
+		sprintf(entryName, "%s.%d", CLASS_PATH, i + 1);
 		entry = iniparser_getstr(ini, entryName);
-		if(entry != NULL) {
+		if (entry != NULL) {
 			ExpandClassPathEntry(entry, entries, &index, MAX_PATH);
 		}
 		i++;
-		if(i > 10 && entry == NULL) {
+		if (i > 10 && entry == NULL) {
 			break;
 		}
 	}
 
 	char* classpath = NULL;
-	for(int i = 0; i < index; i++) {
-		char* temp = (char *) malloc(sizeof(TCHAR)*(strlen(entries[i]) + 1) + (classpath == NULL ? 1 : sizeof(TCHAR)*(strlen(classpath) + 2)));
+	for (int i = 0; i < index; i++) {
+		char* temp = (char *)malloc(sizeof(TCHAR)*(strlen(entries[i]) + 1) + (classpath == NULL ? 1 : sizeof(TCHAR)*(strlen(classpath) + 2)));
 		temp[0] = 0;
-		if(classpath != NULL) {
+		if (classpath != NULL) {
 			lstrcat(temp, classpath);
 			lstrcat(temp, ";");
 			free(classpath);
@@ -144,13 +146,13 @@ void Classpath::BuildClassPath(dictionary* ini, TCHAR** args, UINT& count)
 	Log::Info("Generated Classpath: %s", argl);
 
 	// Generate and add classpath arg
-	TCHAR* cpArg = (TCHAR *) malloc(sizeof(TCHAR)*(strlen(built) + 1) + sizeof(TCHAR)*(strlen(CLASS_PATH_ARG) + 1));
+	TCHAR* cpArg = (TCHAR *)malloc(sizeof(TCHAR)*(strlen(built) + 1) + sizeof(TCHAR)*(strlen(CLASS_PATH_ARG) + 1));
 	lstrcpy(cpArg, CLASS_PATH_ARG);
 	lstrcat(cpArg, built);
 	args[count++] = cpArg;
 
 	// Now set the working directory back
-	if(workingDirectory == NULL) {
+	if (workingDirectory == NULL) {
 		SetCurrentDirectory(current);
 	}
 }

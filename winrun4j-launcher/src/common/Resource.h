@@ -1,16 +1,16 @@
 /*******************************************************************************
  * This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ *
  * Contributors:
  *     Peter Smith
  *******************************************************************************/
 
 #include "Runtime.h"
 
-typedef struct 
+typedef struct
 {
 	BYTE width;
 	BYTE height;
@@ -22,7 +22,7 @@ typedef struct
 	DWORD imageOffset;
 } ICONENTRY;
 
-typedef struct  
+typedef struct
 {
 	WORD reserved;
 	WORD type;
@@ -30,7 +30,7 @@ typedef struct
 	ICONENTRY entries[1];
 } ICONHEADER;
 
-typedef struct 
+typedef struct
 {
 	BITMAPINFOHEADER header;
 	RGBQUAD colors;
@@ -55,7 +55,7 @@ typedef struct
 	WORD id;
 } GRPICONENTRY;
 
-typedef struct 
+typedef struct
 {
 	WORD reserved;
 	WORD type;

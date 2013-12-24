@@ -1,9 +1,9 @@
 /*******************************************************************************
  * This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ *
  * Contributors:
  *     Peter Smith
  *******************************************************************************/
@@ -22,13 +22,13 @@ UINT INI::GetNumberedKeysMax(dictionary* ini, TCHAR* keyName)
 {
 	UINT idx = 0, max = 0;
 	TCHAR entryName[MAX_PATH];
-	while(true) {
-		sprintf(entryName, "%s.%d", keyName, idx+1);
+	while (true) {
+		sprintf(entryName, "%s.%d", keyName, idx + 1);
 		TCHAR* entry = iniparser_getstr(ini, entryName);
-		if(idx > 10 && entry == NULL )
+		if (idx > 10 && entry == NULL)
 			break;
 		idx++;
-		if(entry) 
+		if (entry)
 			max = idx;
 	}
 	return max;
@@ -38,14 +38,14 @@ void INI::GetNumberedKeysFromIni(dictionary* ini, TCHAR* keyName, TCHAR** entrie
 {
 	UINT i = 0;
 	TCHAR entryName[MAX_PATH];
-	while(true) {
-		sprintf(entryName, "%s.%d", keyName, i+1);
+	while (true) {
+		sprintf(entryName, "%s.%d", keyName, i + 1);
 		TCHAR* entry = iniparser_getstr(ini, entryName);
-		if(entry != NULL) {
+		if (entry != NULL) {
 			entries[index++] = _strdup(entry);
 		}
 		i++;
-		if(i > max && entry == NULL) {
+		if (i > max && entry == NULL) {
 			break;
 		}
 	}
@@ -56,15 +56,15 @@ void INI::SetNumberedKeys(dictionary* ini, TCHAR* keyName, TCHAR** entries, UINT
 {
 	UINT max = GetNumberedKeysMax(ini, keyName);
 	TCHAR entryName[MAX_PATH];
-	for(int i = 0; i < count; i++) {
-		sprintf(entryName, "%s.%d", keyName, i+max+1);
+	for (int i = 0; i < count; i++) {
+		sprintf(entryName, "%s.%d", keyName, i + max + 1);
 		iniparser_setstr(ini, entryName, entries[i]);
 	}
 }
 
-/* 
- * The ini filename is in the same directory as the executable and 
- * called the same (except with ini at the end). 
+/*
+ * The ini filename is in the same directory as the executable and
+ * called the same (except with ini at the end).
  */
 dictionary* INI::LoadIniFile(HINSTANCE hInstance)
 {
@@ -91,13 +91,13 @@ dictionary* INI::LoadIniFile(HINSTANCE hInstance, LPSTR inifile)
 
 	// First attempt to load INI from exe
 	HRSRC hi = FindResource(hInstance, MAKEINTRESOURCE(1), RT_INI_FILE);
-	if(hi) {
+	if (hi) {
 		HGLOBAL hg = LoadResource(hInstance, hi);
-		PBYTE pb = (PBYTE) LockResource(hg);
-		DWORD* pd = (DWORD*) pb;
-		if(pd && *pd == INI_RES_MAGIC) {
-			ini = iniparser_load((char *) &pb[RES_MAGIC_SIZE], true);	
-			if(!ini) {
+		PBYTE pb = (PBYTE)LockResource(hg);
+		DWORD* pd = (DWORD*)pb;
+		if (pd && *pd == INI_RES_MAGIC) {
+			ini = iniparser_load((char *)&pb[RES_MAGIC_SIZE], true);
+			if (!ini) {
 				Log::Warning("Could not load embedded INI file");
 			}
 		}
@@ -105,19 +105,20 @@ dictionary* INI::LoadIniFile(HINSTANCE hInstance, LPSTR inifile)
 
 	// Check if we have already loaded an embedded INI file - if so 
 	// then we only need to load and merge the INI file (if present)
-	if(ini && iniparser_getboolean(ini, ALLOW_INI_OVERRIDE, 1)) {
+	if (ini && iniparser_getboolean(ini, ALLOW_INI_OVERRIDE, 1)) {
 		dictionary* ini2 = iniparser_load(inifile);
-		if(ini2) {
-			for(int i = 0; i < ini2->n; i++) {
+		if (ini2) {
+			for (int i = 0; i < ini2->n; i++) {
 				char* key = ini2->key[i];
 				char* value = ini2->val[i];
 				iniparser_setstr(ini, key, value);
-			}		
+			}
 			iniparser_freedict(ini2);
 		}
-	} else if(!ini) {
+	}
+	else if (!ini) {
 		ini = iniparser_load(inifile);
-		if(ini == NULL) {
+		if (ini == NULL) {
 			Log::Error("Could not load INI file: %s", inifile);
 			return NULL;
 		}
@@ -131,18 +132,19 @@ dictionary* INI::LoadIniFile(HINSTANCE hInstance, LPSTR inifile)
 
 	// Now check if we have an external file to load
 	char* iniFileLocation = iniparser_getstr(ini, INI_FILE_LOCATION);
-	if(iniFileLocation) {
+	if (iniFileLocation) {
 		Log::Info("Loading INI keys from file location: %s", iniFileLocation);
 		dictionary* ini3 = iniparser_load(iniFileLocation);
-		if(ini3) {
+		if (ini3) {
 			ExpandVariables(ini3);
-			for(int i = 0; i < ini3->n; i++) {
+			for (int i = 0; i < ini3->n; i++) {
 				char* key = ini3->key[i];
 				char* value = ini3->val[i];
 				iniparser_setstr(ini, key, value);
-			}		
+			}
 			iniparser_freedict(ini3);
-		} else {
+		}
+		else {
 			Log::Warning("Could not load INI keys from file: %s", iniFileLocation);
 		}
 	}
@@ -180,10 +182,10 @@ char* INI::GetString(dictionary* ini, const TCHAR* section, const TCHAR* key, TC
 {
 	char tmp[MAX_PATH];
 	tmp[0] = 0;
-	if(section)
+	if (section)
 		strcat(tmp, section);
 	strcat(tmp, key);
-	if(section && defFromMainSection) defValue = iniparser_getstring(ini, key, defValue);
+	if (section && defFromMainSection) defValue = iniparser_getstring(ini, key, defValue);
 	return iniparser_getstring(ini, tmp, defValue);
 }
 
@@ -191,10 +193,10 @@ int INI::GetInteger(dictionary* ini, const TCHAR* section, const TCHAR* key, int
 {
 	char tmp[MAX_PATH];
 	tmp[0] = 0;
-	if(section)
+	if (section)
 		strcat(tmp, section);
 	strcat(tmp, key);
-	if(section && defFromMainSection) defValue = iniparser_getint(ini, key, defValue);
+	if (section && defFromMainSection) defValue = iniparser_getint(ini, key, defValue);
 	return iniparser_getint(ini, tmp, defValue);
 }
 
@@ -202,10 +204,10 @@ bool INI::GetBoolean(dictionary* ini, const TCHAR* section, const TCHAR* key, bo
 {
 	char tmp[MAX_PATH];
 	tmp[0] = 0;
-	if(section)
+	if (section)
 		strcat(tmp, section);
 	strcat(tmp, key);
-	if(section && defFromMainSection) defValue = iniparser_getboolean(ini, key, defValue);
+	if (section && defFromMainSection) defValue = iniparser_getboolean(ini, key, defValue);
 	return iniparser_getboolean(ini, tmp, defValue);
 }
 
@@ -213,7 +215,7 @@ void INI::ParseRegistryKeys(dictionary* ini)
 {
 	// Now check if we have a registry location to load from
 	char* iniRegistryLocation = iniparser_getstr(ini, INI_REGISTRY_LOCATION);
-	if(!iniRegistryLocation) {
+	if (!iniRegistryLocation) {
 		return;
 	}
 
@@ -222,10 +224,10 @@ void INI::ParseRegistryKeys(dictionary* ini)
 	// find root key
 	int len = strlen(iniRegistryLocation);
 	int slash = 0;
-	while(slash < len && iniRegistryLocation[slash] != '\\')
-        slash++;
+	while (slash < len && iniRegistryLocation[slash] != '\\')
+		slash++;
 
-	if(slash == len) {
+	if (slash == len) {
 		Log::Warning("Unable to parse registry location (%s) - keys not included", iniRegistryLocation);
 		return;
 	}
@@ -235,13 +237,13 @@ void INI::ParseRegistryKeys(dictionary* ini)
 
 	HKEY hKey = GetHKey(rootKey);
 	free(rootKey);
-	if(hKey == 0) {
+	if (hKey == 0) {
 		Log::Warning("Unrecognized registry root key: %s", rootKey);
 		return;
 	}
 
 	HKEY subKey;
-	if(RegOpenKeyEx(hKey, &iniRegistryLocation[slash+1], 0, KEY_READ, &subKey) != ERROR_SUCCESS) {
+	if (RegOpenKeyEx(hKey, &iniRegistryLocation[slash + 1], 0, KEY_READ, &subKey) != ERROR_SUCCESS) {
 		Log::Warning("Unable to open registry location (%s)", iniRegistryLocation);
 		return;
 	}
@@ -253,14 +255,15 @@ void INI::ParseRegistryKeys(dictionary* ini)
 	DWORD nameLen = MAX_PATH;
 	DWORD dataLen = 4096;
 	name[0] = ':';
-	while(RegEnumValue(subKey, index, &name[1], &nameLen, NULL, &type, (LPBYTE) data, &dataLen) == ERROR_SUCCESS) {
+	while (RegEnumValue(subKey, index, &name[1], &nameLen, NULL, &type, (LPBYTE)data, &dataLen) == ERROR_SUCCESS) {
 		bool hasNamespace = StrContains(&name[1], ':');
 		char* key = hasNamespace ? &name[1] : name;
-		if(type == REG_DWORD) {
+		if (type == REG_DWORD) {
 			DWORD val = *((LPDWORD)data);
 			sprintf(data, "%d", val);
 			iniparser_setstr(ini, key, data);
-		} else if(type == REG_SZ && dataLen > 1) {
+		}
+		else if (type == REG_SZ && dataLen > 1) {
 			iniparser_setstr(ini, key, data);
 		}
 		nameLen = MAX_PATH;
@@ -274,17 +277,22 @@ HKEY INI::GetHKey(char* key)
 {
 	HKEY hKey = 0;
 
-	if(strcmp(key, "HKEY_LOCAL_MACHINE") == 0) {
+	if (strcmp(key, "HKEY_LOCAL_MACHINE") == 0) {
 		hKey = HKEY_LOCAL_MACHINE;
-	} else if(strcmp(key, "HKLM") == 0) {
+	}
+	else if (strcmp(key, "HKLM") == 0) {
 		hKey = HKEY_LOCAL_MACHINE;
-	} else if(strcmp(key, "HKEY_CURRENT_USER") == 0) {
+	}
+	else if (strcmp(key, "HKEY_CURRENT_USER") == 0) {
 		hKey = HKEY_CURRENT_USER;
-	} else if(strcmp(key, "HKCU") == 0) {
+	}
+	else if (strcmp(key, "HKCU") == 0) {
 		hKey = HKEY_CURRENT_USER;
-	} else if(strcmp(key, "HKEY_CLASSES_ROOT") == 0) {
+	}
+	else if (strcmp(key, "HKEY_CLASSES_ROOT") == 0) {
 		hKey = HKEY_CLASSES_ROOT;
-	} else if(strcmp(key, "HKCR") == 0) {
+	}
+	else if (strcmp(key, "HKCR") == 0) {
 		hKey = HKEY_CLASSES_ROOT;
 	}
 	return hKey;
@@ -296,7 +304,7 @@ int INI::GetRegistryValue(char* input, char* output, int len)
 	char rootKey[4096];
 	strcpy(rootKey, input);
 	char* slash = strchr(rootKey, '\\');
-	if(slash == NULL) {
+	if (slash == NULL) {
 		Log::Warning("Invalid registry key, no backslash found (%s)", input);
 		return ERROR_INVALID_DATA;
 	}
@@ -310,7 +318,7 @@ int INI::GetRegistryValue(char* input, char* output, int len)
 	Log::Info("GetRegistryValue full key (%s)", key);
 
 	char* colon = strchr(key, ':');
-	if(colon == NULL) {
+	if (colon == NULL) {
 		Log::Warning("Invalid registry key, no key name found (%s)", input);
 		return ERROR_INVALID_DATA;
 	}
@@ -325,21 +333,21 @@ int INI::GetRegistryValue(char* input, char* output, int len)
 
 	HKEY subKey;
 
-	long result = RegOpenKeyEx(hKey, key, 0, KEY_READ|KEY_WOW64_64KEY, &subKey);
-	if(result != ERROR_SUCCESS) {
+	long result = RegOpenKeyEx(hKey, key, 0, KEY_READ | KEY_WOW64_64KEY, &subKey);
+	if (result != ERROR_SUCCESS) {
 		Log::Warning("Unable to open registry key (%s) error (%d)", input, result);
 		return ERROR_INVALID_DATA;
 	}
 
 	DWORD type;
-	if(RegQueryValueEx(subKey, valueName, NULL, (LPDWORD)&type, (LPBYTE)output, (LPDWORD)&len) != ERROR_SUCCESS) {
+	if (RegQueryValueEx(subKey, valueName, NULL, (LPDWORD)&type, (LPBYTE)output, (LPDWORD)&len) != ERROR_SUCCESS) {
 		Log::Warning("Unable to get registry value (%s)", input);
 		return ERROR_INVALID_DATA;
 	}
-	if(type != REG_DWORD && type != REG_SZ) {
+	if (type != REG_DWORD && type != REG_SZ) {
 		return ERROR_INVALID_DATA;
 	}
-	if(type == REG_DWORD) {
+	if (type == REG_DWORD) {
 		DWORD val = *((LPDWORD)output);
 		sprintf(output, "%d", val);
 	}
@@ -352,25 +360,25 @@ void INI::ExpandRegistryVariables(dictionary* ini)
 	char tmp[4096];
 	char result[4096];
 	int len = 4096;
-	for(int i = 0; i < ini->size; i++) {
+	for (int i = 0; i < ini->size; i++) {
 		char* key = ini->key[i];
 		char* value = ini->val[i];
-		if(value == NULL) {
+		if (value == NULL) {
 			continue;
 		}
 		strcpy(tmp, value);
 		char* expansionStart = strstr(tmp, "$REG{");
-		if(expansionStart == NULL) {
+		if (expansionStart == NULL) {
 			continue;
 		}
 		char* keyStart = expansionStart + 5;
 		*expansionStart = 0;
 		char* regEnd = strchr(keyStart, '}');
-		if(regEnd == NULL) {
+		if (regEnd == NULL) {
 			continue;
 		}
 		*regEnd = 0;
-		if(GetRegistryValue(keyStart, result, len) == ERROR_SUCCESS) {
+		if (GetRegistryValue(keyStart, result, len) == ERROR_SUCCESS) {
 			char ev[4096];
 			strcpy(ev, tmp);
 			strcat(ev, result);
@@ -384,11 +392,11 @@ void INI::ExpandRegistryVariables(dictionary* ini)
 void INI::ExpandVariables(dictionary* ini)
 {
 	char tmp[4096];
-	for(int i = 0; i < ini->size; i++) {
+	for (int i = 0; i < ini->size; i++) {
 		char* key = ini->key[i];
 		char* value = ini->val[i];
 		int size = ExpandEnvironmentStrings(value, tmp, 4096);
-		if(size == 0) {
+		if (size == 0) {
 			Log::Warning("Could not expand variable: %s", value);
 		}
 		iniparser_setstr(ini, key, tmp);

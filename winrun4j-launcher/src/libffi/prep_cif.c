@@ -35,46 +35,46 @@
 
 static ffi_status initialize_aggregate(ffi_type *arg)
 {
-  ffi_type **ptr;
+	ffi_type **ptr;
 
-  FFI_ASSERT(arg != NULL);
+	FFI_ASSERT(arg != NULL);
 
-  FFI_ASSERT(arg->elements != NULL);
-  FFI_ASSERT(arg->size == 0);
-  FFI_ASSERT(arg->alignment == 0);
+	FFI_ASSERT(arg->elements != NULL);
+	FFI_ASSERT(arg->size == 0);
+	FFI_ASSERT(arg->alignment == 0);
 
-  ptr = &(arg->elements[0]);
+	ptr = &(arg->elements[0]);
 
-  while ((*ptr) != NULL)
-    {
-      if (((*ptr)->size == 0) && (initialize_aggregate((*ptr)) != FFI_OK))
-	return FFI_BAD_TYPEDEF;
+	while ((*ptr) != NULL)
+	{
+		if (((*ptr)->size == 0) && (initialize_aggregate((*ptr)) != FFI_OK))
+			return FFI_BAD_TYPEDEF;
 
-      /* Perform a sanity check on the argument type */
-      FFI_ASSERT_VALID_TYPE(*ptr);
+		/* Perform a sanity check on the argument type */
+		FFI_ASSERT_VALID_TYPE(*ptr);
 
-      arg->size = ALIGN(arg->size, (*ptr)->alignment);
-      arg->size += (*ptr)->size;
+		arg->size = ALIGN(arg->size, (*ptr)->alignment);
+		arg->size += (*ptr)->size;
 
-      arg->alignment = (arg->alignment > (*ptr)->alignment) ?
-	arg->alignment : (*ptr)->alignment;
+		arg->alignment = (arg->alignment > (*ptr)->alignment) ?
+			arg->alignment : (*ptr)->alignment;
 
-      ptr++;
-    }
+		ptr++;
+	}
 
-  /* Structure size includes tail padding.  This is important for
-     structures that fit in one register on ABIs like the PowerPC64
-     Linux ABI that right justify small structs in a register.
-     It's also needed for nested structure layout, for example
-     struct A { long a; char b; }; struct B { struct A x; char y; };
-     should find y at an offset of 2*sizeof(long) and result in a
-     total size of 3*sizeof(long).  */
-  arg->size = ALIGN (arg->size, arg->alignment);
+	/* Structure size includes tail padding.  This is important for
+	   structures that fit in one register on ABIs like the PowerPC64
+	   Linux ABI that right justify small structs in a register.
+	   It's also needed for nested structure layout, for example
+	   struct A { long a; char b; }; struct B { struct A x; char y; };
+	   should find y at an offset of 2*sizeof(long) and result in a
+	   total size of 3*sizeof(long).  */
+	arg->size = ALIGN(arg->size, arg->alignment);
 
-  if (arg->size == 0)
-    return FFI_BAD_TYPEDEF;
-  else
-    return FFI_OK;
+	if (arg->size == 0)
+		return FFI_BAD_TYPEDEF;
+	else
+		return FFI_OK;
 }
 
 #ifndef __CRIS__
@@ -86,85 +86,85 @@ static ffi_status initialize_aggregate(ffi_type *arg)
    machine dependent routine. */
 
 ffi_status ffi_prep_cif(ffi_cif *cif, ffi_abi abi, unsigned int nargs,
-			ffi_type *rtype, ffi_type **atypes)
+	ffi_type *rtype, ffi_type **atypes)
 {
-  unsigned bytes = 0;
-  unsigned int i;
-  ffi_type **ptr;
+	unsigned bytes = 0;
+	unsigned int i;
+	ffi_type **ptr;
 
-  FFI_ASSERT(cif != NULL);
-  FFI_ASSERT((abi > FFI_FIRST_ABI) && (abi <= FFI_DEFAULT_ABI));
+	FFI_ASSERT(cif != NULL);
+	FFI_ASSERT((abi > FFI_FIRST_ABI) && (abi <= FFI_DEFAULT_ABI));
 
-  cif->abi = abi;
-  cif->arg_types = atypes;
-  cif->nargs = nargs;
-  cif->rtype = rtype;
-  cif->flags = 0;
+	cif->abi = abi;
+	cif->arg_types = atypes;
+	cif->nargs = nargs;
+	cif->rtype = rtype;
+	cif->flags = 0;
 
-  /* Initialize the return type if necessary */
-  if ((cif->rtype->size == 0) && (initialize_aggregate(cif->rtype) != FFI_OK))
-    return FFI_BAD_TYPEDEF;
+	/* Initialize the return type if necessary */
+	if ((cif->rtype->size == 0) && (initialize_aggregate(cif->rtype) != FFI_OK))
+		return FFI_BAD_TYPEDEF;
 
-  /* Perform a sanity check on the return type */
-  FFI_ASSERT_VALID_TYPE(cif->rtype);
+	/* Perform a sanity check on the return type */
+	FFI_ASSERT_VALID_TYPE(cif->rtype);
 
-  /* x86, x86-64 and s390 stack space allocation is handled in prep_machdep. */
+	/* x86, x86-64 and s390 stack space allocation is handled in prep_machdep. */
 #if !defined M68K && !defined __i386__ && !defined __x86_64__ && !defined S390 && !defined PA
-  /* Make space for the return structure pointer */
-  if (cif->rtype->type == FFI_TYPE_STRUCT
+	/* Make space for the return structure pointer */
+	if (cif->rtype->type == FFI_TYPE_STRUCT
 #ifdef SPARC
-      && (cif->abi != FFI_V9 || cif->rtype->size > 32)
+		&& (cif->abi != FFI_V9 || cif->rtype->size > 32)
 #endif
-     )
-    bytes = STACK_ARG_SIZE(sizeof(void*));
+		)
+		bytes = STACK_ARG_SIZE(sizeof(void*));
 #endif
 
-  for (ptr = cif->arg_types, i = cif->nargs; i > 0; i--, ptr++)
-    {
+	for (ptr = cif->arg_types, i = cif->nargs; i > 0; i--, ptr++)
+	{
 
-      /* Initialize any uninitialized aggregate type definitions */
-      if (((*ptr)->size == 0) && (initialize_aggregate((*ptr)) != FFI_OK))
-	return FFI_BAD_TYPEDEF;
+		/* Initialize any uninitialized aggregate type definitions */
+		if (((*ptr)->size == 0) && (initialize_aggregate((*ptr)) != FFI_OK))
+			return FFI_BAD_TYPEDEF;
 
-      /* Perform a sanity check on the argument type, do this
-	 check after the initialization.  */
-      FFI_ASSERT_VALID_TYPE(*ptr);
+		/* Perform a sanity check on the argument type, do this
+	   check after the initialization.  */
+		FFI_ASSERT_VALID_TYPE(*ptr);
 
 #if !defined __i386__ && !defined __x86_64__ && !defined S390 && !defined PA
 #ifdef SPARC
-      if (((*ptr)->type == FFI_TYPE_STRUCT
-	   && ((*ptr)->size > 16 || cif->abi != FFI_V9))
-	  || ((*ptr)->type == FFI_TYPE_LONGDOUBLE
-	      && cif->abi != FFI_V9))
-	bytes += sizeof(void*);
-      else
+		if (((*ptr)->type == FFI_TYPE_STRUCT
+			&& ((*ptr)->size > 16 || cif->abi != FFI_V9))
+			|| ((*ptr)->type == FFI_TYPE_LONGDOUBLE
+			&& cif->abi != FFI_V9))
+			bytes += sizeof(void*);
+		else
 #endif
-	{
-	  /* Add any padding if necessary */
-	  if (((*ptr)->alignment - 1) & bytes)
-	    bytes = ALIGN(bytes, (*ptr)->alignment);
+		{
+			/* Add any padding if necessary */
+			if (((*ptr)->alignment - 1) & bytes)
+				bytes = ALIGN(bytes, (*ptr)->alignment);
 
-	  bytes += STACK_ARG_SIZE((*ptr)->size);
+			bytes += STACK_ARG_SIZE((*ptr)->size);
+		}
+#endif
 	}
-#endif
-    }
 
-  cif->bytes = bytes;
+	cif->bytes = bytes;
 
-  /* Perform machine dependent cif processing */
-  return ffi_prep_cif_machdep(cif);
+	/* Perform machine dependent cif processing */
+	return ffi_prep_cif_machdep(cif);
 }
 #endif /* not __CRIS__ */
 
 #if FFI_CLOSURES
 
 ffi_status
-ffi_prep_closure (ffi_closure* closure,
-		  ffi_cif* cif,
-		  void (*fun)(ffi_cif*,void*,void**,void*),
-		  void *user_data)
+ffi_prep_closure(ffi_closure* closure,
+ffi_cif* cif,
+void(*fun)(ffi_cif*, void*, void**, void*),
+void *user_data)
 {
-  return ffi_prep_closure_loc (closure, cif, fun, user_data, closure);
+	return ffi_prep_closure_loc(closure, cif, fun, user_data, closure);
 }
 
 #endif

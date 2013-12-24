@@ -1,9 +1,9 @@
 /*******************************************************************************
  * This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ *
  * Contributors:
  *     Peter Smith
  *******************************************************************************/
@@ -63,11 +63,11 @@ struct VM {
 	static int StartJavaVM(TCHAR* libPath, TCHAR* vmArgs[], HINSTANCE hInstance);
 	static int CleanupVM();
 	static JavaVM* GetJavaVM();
-	static JNIEnv* GetJNIEnv(bool daemon=false);
+	static JNIEnv* GetJNIEnv(bool daemon = false);
 	static void DetachCurrentThread();
 	static void AbortHook();
 	static void ExitHook(int status);
-	
+
 public:
 	static Version* FindVersion(Version* versions, DWORD numVersions, LPSTR version, LPSTR min, LPSTR max);
 	static void FindVersions(Version* versions, DWORD* numVersions);

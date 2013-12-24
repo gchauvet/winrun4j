@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------
    types.c - Copyright (c) 1996, 1998  Red Hat, Inc.
-   
+
    Predefined ffi_types needed by libffi.
 
    Permission is hereby granted, free of charge, to any person obtaining
@@ -34,19 +34,19 @@
 /* Type definitions */
 
 #define FFI_TYPEDEF(name, type, id)		\
-struct struct_align_##name {			\
-  char c;					\
-  type x;					\
+struct struct_align_##name{ \
+	char c;					\
+	type x;					\
 };						\
-const ffi_type ffi_type_##name = {		\
-  sizeof(type),					\
-  offsetof(struct struct_align_##name, x),	\
-  id, NULL					\
-}
+	const ffi_type ffi_type_##name = { \
+	sizeof(type), \
+	offsetof(struct struct_align_##name, x), \
+	id, NULL					\
+	}
 
 /* Size and alignment are fake here. They must not be 0. */
 const ffi_type ffi_type_void = {
-  1, 1, FFI_TYPE_VOID, NULL
+	1, 1, FFI_TYPE_VOID, NULL
 };
 
 FFI_TYPEDEF(uint8, UINT8, FFI_TYPE_UINT8);
