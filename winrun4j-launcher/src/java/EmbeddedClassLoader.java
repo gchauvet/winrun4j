@@ -88,7 +88,6 @@ public final class EmbeddedClassLoader extends URLClassLoader
             try {
                 while ((ze = zis.getNextEntry()) != null) {
                     String s = ze.getName();
-					System.out.println("Compare \"" + cname + "\" to \"" + s + "\"");
                     if (cname.equals(s)) {
                         ByteArrayOutputStream bos = new ByteArrayOutputStream();
                         byte[] buf = new byte[4096];

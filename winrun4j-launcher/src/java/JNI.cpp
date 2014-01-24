@@ -92,7 +92,6 @@ int JNI::RunMainClass(JNIEnv* env, TCHAR* mainClassStr, int argc, char* argv[])
 		return 1;
 	}
 
-	StrReplace(mainClassStr, '.', '/');
 	jclass mainClass = FindClass(env, mainClassStr);
 
 	if (mainClass == NULL) {
