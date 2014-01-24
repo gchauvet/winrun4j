@@ -45,16 +45,18 @@ void JNI::Init(JNIEnv* env)
 
 jclass JNI::FindClass(JNIEnv* env, TCHAR* classStr)
 {
-	if (g_classLoader == NULL) {
-		return env->FindClass(classStr);
-	}
+	jclass result = NULL;
 
-	jclass cl = (jclass)env->CallObjectMethod(g_classLoader, g_findClassMethod, env->NewStringUTF(classStr));
-	// Workaround for bug in sun 1.6 VMs
-	if (cl && CLASS_GETCTORS_METHOD) {
-		env->CallObjectMethod(cl, CLASS_GETCTORS_METHOD);
+	if (g_classLoader == NULL) {
+		result = env->FindClass(classStr);
+	} else {
+	    result = (jclass)env->CallObjectMethod(g_classLoader, g_findClassMethod, env->NewStringUTF(classStr));
+		// Workaround for bug in sun 1.6 VMs
+		if (result && CLASS_GETCTORS_METHOD) {
+			env->CallObjectMethod(result, CLASS_GETCTORS_METHOD);
+		}
 	}
-	return cl;
+	return result;
 }
 
 /*
@@ -90,11 +92,8 @@ int JNI::RunMainClass(JNIEnv* env, TCHAR* mainClassStr, int argc, char* argv[])
 		return 1;
 	}
 
+	StrReplace(mainClassStr, '.', '/');
 	jclass mainClass = FindClass(env, mainClassStr);
-
-	if (mainClass == NULL) {
-		mainClass = FindClass(NULL, mainClassStr);
-	}
 
 	if (mainClass == NULL) {
 		Log::Error("Could not find or initialize main class");

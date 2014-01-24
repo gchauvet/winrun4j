@@ -16,9 +16,9 @@
 int PrintUsage()
 {
 #ifdef X64
-	printf("WinRun4J 64-bit Resource Editor v1.0 (winrun4j.sf.net)\n\n");
+	printf("WinRun4J 64-bit Resource Editor v1.1 (https://github.com/poidasmith/winrun4j)\n\n");
 #else
-	printf("WinRun4J Resource Editor v1.0 (winrun4j.sf.net)\n\n");
+	printf("WinRun4J Resource Editor v1.1 (https://github.com/poidasmith/winrun4j)\n\n");
 #endif
 	printf("Edits resources in executables (EXE) and dynamic link-libraries (DLL).\n\n");
 #ifdef X64
